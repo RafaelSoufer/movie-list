@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './index.css';
 
 function Movielist() {
-  const [selectedYear, setSelectedYear] = useState(null);
+  const [selectedYear, setSelectedYear] = useState(null || '');
   const [result, setResult] = useState([]);
   const [clicked, setClicked] = useState(false);
 
@@ -11,7 +11,6 @@ function Movielist() {
   };
 
   const onClick = () => {
-    result.length > 0 ? setClicked(false) : setClicked(true) 
     resolveData(selectedYear);
   };
 
@@ -21,11 +20,17 @@ function Movielist() {
         `https://jsonmock.hackerrank.com/api/moviesdata?Year=${year}`
       );
       const result = await response.json();
+      result.data.length <=0 ? setClicked(true) : setClicked(false)
       setResult(result.data);
     } catch (error) {
       console.error(error);
+      setClicked(true)
     }
   };
+
+  useEffect(()=>{
+    selectedYear && setClicked(false)
+  },[selectedYear])
 
   return (
     <div className="layout-column align-items-center mt-50">
@@ -38,16 +43,16 @@ function Movielist() {
           value={selectedYear}
           onChange={handleYearChange}
         />
-        <button  className="" data-testid="submit-button" onClick={onClick}>
+        <button  className="" data-testid="submit-button" onClick={onClick} disabled={selectedYear <= 0}>
           Search
         </button>
       </section>
         <ul data-testid="movieList" className="mt-50 styled">
-          {result.length >= 0 && result.map((movie) => (
+          {result.length > 0 && result.map((movie) => (
             <li key={movie.imdbID} className="slide-up-fade-in py-10">{movie.Title}</li>
           ))}
         </ul>
-      {result.length === 0 && clicked && <p className="mt-50 slide-up-fade-in" data-testid="no-result">No Results Found</p> }
+      { selectedYear > 0 && clicked && <p className="mt-50 slide-up-fade-in" data-testid="no-result">No Results Found</p> }
     </div>
   );
 }
